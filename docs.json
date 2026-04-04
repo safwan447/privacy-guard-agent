@@ -1,0 +1,32 @@
+[
+  {
+    "task_id": "task_1_simple",
+    "difficulty": "easy",
+    "segments": [
+      {"text": "Contact us at", "is_pii": false},
+      {"text": "555-0199", "is_pii": true},
+      {"text": "or email", "is_pii": false},
+      {"text": "test@example.com", "is_pii": true}
+    ]
+  },
+  {
+    "task_id": "task_2_contextual",
+    "difficulty": "medium",
+    "segments": [
+      {"text": "The patient", "is_pii": false},
+      {"text": "Alice Smith", "is_pii": true},
+      {"text": "met with", "is_pii": false},
+      {"text": "Doctor Brown", "is_pii": false}
+    ]
+  },
+  {
+    "task_id": "task_3_legal",
+    "difficulty": "hard",
+    "segments": [
+      {"text": "In the matter of", "is_pii": false},
+      {"text": "Case #882-X", "is_pii": true},
+      {"text": "dated", "is_pii": false},
+      {"text": "October 12, 2024", "is_pii": true}
+    ]
+  }
+]
