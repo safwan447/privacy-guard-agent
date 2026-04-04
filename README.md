@@ -9,5 +9,4 @@ pinned: false
 ---
 
 # Privacy Guard Agent
-An RL environment for identifying and redacting PII from sensitive documents. 
-Submitted for the Meta OpenEnv Hackathon.
+RL environment for PII Redaction.
