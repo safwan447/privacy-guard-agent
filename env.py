@@ -4,7 +4,6 @@ from models import PrivacyObservation, PrivacyAction, PrivacyActionType
 
 class PrivacyEnv:
     def __init__(self, data_path="docs.json"):
-        # Use absolute path to ensure Docker finds the file correctly
         base_dir = os.path.dirname(os.path.abspath(__file__))
         full_path = os.path.join(base_dir, data_path)
         
@@ -33,7 +32,6 @@ class PrivacyEnv:
         doc = self.documents[self.doc_idx]
         segments = doc["segments"]
         
-        # Safety check: if we exceed segments, return the last one
         current_idx = min(self.seg_idx, len(segments) - 1)
         segment = segments[current_idx]
         
@@ -47,23 +45,23 @@ class PrivacyEnv:
     def step(self, action: PrivacyAction):
         """
         Processes the action and returns (obs, reward, done, info).
-        Rewards are strictly in the [0.0, 1.0] range per Meta Hackathon rules.
+        META RULE: Rewards must be STRICTLY between 0.0 and 1.0 (e.g., 0.1 or 0.9).
         """
         segments = self.documents[self.doc_idx]["segments"]
         segment = segments[self.seg_idx]
         is_pii = segment["is_pii"]
         
-        # --- REWARD LOGIC: 0.0 to 1.0 Range Only ---
-        reward = 0.0
+        # We use 0.9 for success and 0.1 for failure to stay within (0, 1) range
+        reward = 0.1
         
         if is_pii and action.action == PrivacyActionType.REDACT:
-            reward = 1.0  # Perfect catch of sensitive data
+            reward = 0.9  # Correct Redaction
         elif not is_pii and action.action == PrivacyActionType.KEEP:
-            reward = 1.0  # Correctly identified safe data
+            reward = 0.9  # Correct Keep
         elif is_pii and action.action == PrivacyActionType.KEEP:
-            reward = 0.0  # FAILED: Data Leak (Penalty = lowest possible score)
+            reward = 0.1  # Leak
         elif not is_pii and action.action == PrivacyActionType.REDACT:
-            reward = 0.0  # FAILED: Over-redaction (Penalty = lowest possible score)
+            reward = 0.1  # Over-redaction
         
         # Progress the segment index
         self.seg_idx += 1

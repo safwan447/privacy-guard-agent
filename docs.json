@@ -1,7 +1,9 @@
 [
   {
     "task_id": "task_1_simple",
+    "name": "Pattern Matching",
     "difficulty": "easy",
+    "grader": "pii_accuracy_grader",
     "segments": [
       {"text": "Contact us at", "is_pii": false},
       {"text": "555-0199", "is_pii": true},
@@ -11,7 +13,9 @@
   },
   {
     "task_id": "task_2_contextual",
+    "name": "Entity Recognition",
     "difficulty": "medium",
+    "grader": "pii_accuracy_grader",
     "segments": [
       {"text": "The patient", "is_pii": false},
       {"text": "Alice Smith", "is_pii": true},
@@ -21,7 +25,9 @@
   },
   {
     "task_id": "task_3_legal",
+    "name": "High-Stakes Anonymization",
     "difficulty": "hard",
+    "grader": "pii_accuracy_grader",
     "segments": [
       {"text": "In the matter of", "is_pii": false},
       {"text": "Case #882-X", "is_pii": true},
