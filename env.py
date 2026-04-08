@@ -37,7 +37,7 @@ class PrivacyEnv:
         segments = self.documents[self.doc_idx]["segments"]
         segment = segments[self.seg_idx]
         
-        # Call the grader logic
+        # Use grader logic
         reward = calculate_pii_score(action.action.value, segment["is_pii"])
         
         self.seg_idx += 1

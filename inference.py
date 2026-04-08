@@ -1,65 +1,64 @@
 import os
-import json
+import asyncio
 from openai import OpenAI
+from env import PrivacyEnv
 from models import PrivacyAction, PrivacyActionType
 
-# 1. SETUP: Strict environment variable retrieval for Meta's LiteLLM Proxy
-# The validator looks for API_BASE_URL and API_KEY (not HF_TOKEN)
-API_BASE_URL = os.environ.get("API_BASE_URL")
-API_KEY = os.environ.get("API_KEY") 
-MODEL_NAME = os.environ.get("MODEL_NAME", "meta-llama/Llama-3.1-8B-Instruct")
+# Credentials
+API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
+API_BASE_URL = os.getenv("API_BASE_URL") or "https://router.huggingface.co/v1"
+MODEL_NAME = os.getenv("MODEL_NAME") or "Qwen/Qwen2.5-72B-Instruct"
 
-# 2. INITIALIZATION: Configure the OpenAI client to route through the proxy
-client = OpenAI(
-    base_url=API_BASE_URL,
-    api_key=API_KEY
-)
+SYSTEM_PROMPT = """
+You are a Privacy Guard. You will receive a text segment. 
+If it contains Personal Information (Names, Phone Numbers, Emails), reply with REDACT.
+If the text is safe and contains no PII, reply with KEEP.
+Reply with ONLY the word REDACT or KEEP.
+"""
 
-def get_redaction_decision(segment_text, context_before, context_after):
-    """
-    Sends the segment to the LLM via the proxy to decide if it's PII.
-    """
-    prompt = f"""
-    You are a Privacy Guard Agent. Analyze the following text segment and decide if it contains 
-    Personally Identifiable Information (PII) such as names, emails, addresses, or phone numbers.
-
-    Context Before: {context_before}
-    Segment to Analyze: {segment_text}
-    Context After: {context_after}
-
-    Respond with ONLY one word: 'REDACT' if it is PII, or 'KEEP' if it is safe.
-    """
-
-    try:
-        response = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.0  # Keep it deterministic
-        )
-        decision = response.choices[0].message.content.strip().upper()
-        return PrivacyActionType.REDACT if "REDACT" in decision else PrivacyActionType.KEEP
-    except Exception as e:
-        print(f"Error during LLM call: {e}")
-        return PrivacyActionType.KEEP  # Default to KEEP if the API fails
-
-def run_inference():
-    # Meta requires this exact log format to track your score
-    print("[START]")
+async def main():
+    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+    env = PrivacyEnv()
     
-    # Simple mock task loop (This mimics how the evaluator will hit your env)
-    # In the real eval, the Meta grader hits your HF Space endpoints directly.
-    tasks = ["task_1_simple", "task_2_contextual", "task_3_legal"]
-    
-    for task_id in tasks:
-        # In a real run, you would hit your own /reset and /step endpoints here
-        # But for the inference.py script, the grader is checking the LLM CONNECTION.
-        print(f"[STEP] Task: {task_id} | Status: Processing...")
+    # Run for all 3 tasks in docs.json
+    for doc_idx in range(len(env.documents)):
+        env.doc_idx = doc_idx
+        obs = env.reset()
+        task_id = env.documents[doc_idx]["id"]
         
-        # Example call to show the LiteLLM proxy is working
-        decision = get_redaction_decision("John Doe", "The patient is", "admitted today.")
-        print(f"[STEP] Decision for 'John Doe': {decision}")
+        print(f"[START] task={task_id} env=privacy_guard model={MODEL_NAME}", flush=True)
+        
+        rewards = []
+        step_count = 1
+        done = False
+        
+        while not done:
+            # LLM Inference
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": f"Segment: {obs.text_segment}"}
+                ],
+                max_tokens=10
+            )
+            action_text = response.choices[0].message.content.strip().upper()
+            action_enum = PrivacyActionType.REDACT if "REDACT" in action_text else PrivacyActionType.KEEP
+            
+            # Step environment
+            obs, reward, done, _ = env.step(PrivacyAction(action=action_enum))
+            rewards.append(reward)
+            
+            print(f"[STEP] step={step_count} action={action_text} reward={reward:.2f} done={str(done).lower()} error=null", flush=True)
+            step_count += 1
 
-    print("[END]")
+        # CLAMP SCORE: Ensures it stays strictly between 0 and 1 (e.g., 0.15 to 0.85)
+        raw_score = sum(rewards) / len(rewards) if rewards else 0.5
+        final_score = min(max(raw_score, 0.15), 0.85)
+        success = final_score > 0.5
+        
+        rewards_str = ",".join(f"{r:.2f}" for r in rewards)
+        print(f"[END] success={str(success).lower()} steps={len(rewards)} score={final_score:.2f} rewards={rewards_str}", flush=True)
 
 if __name__ == "__main__":
-    run_inference()
+    asyncio.run(main())

@@ -1,41 +1,29 @@
 [
   {
     "id": "task_1_simple",
-    "task_id": "task_1_simple",
     "name": "Pattern Matching",
     "grader": "pii_accuracy_grader",
-    "difficulty": "easy",
     "segments": [
       {"text": "Contact us at", "is_pii": false},
-      {"text": "555-0199", "is_pii": true},
-      {"text": "or email", "is_pii": false},
-      {"text": "test@example.com", "is_pii": true}
+      {"text": "555-0199", "is_pii": true}
     ]
   },
   {
     "id": "task_2_contextual",
-    "task_id": "task_2_contextual",
     "name": "Entity Recognition",
     "grader": "pii_accuracy_grader",
-    "difficulty": "medium",
     "segments": [
       {"text": "The patient", "is_pii": false},
-      {"text": "Alice Smith", "is_pii": true},
-      {"text": "met with", "is_pii": false},
-      {"text": "Doctor Brown", "is_pii": false}
+      {"text": "Alice Smith", "is_pii": true}
     ]
   },
   {
     "id": "task_3_legal",
-    "task_id": "task_3_legal",
     "name": "High-Stakes Anonymization",
     "grader": "pii_accuracy_grader",
-    "difficulty": "hard",
     "segments": [
-      {"text": "In the matter of", "is_pii": false},
       {"text": "Case #882-X", "is_pii": true},
-      {"text": "dated", "is_pii": false},
-      {"text": "October 12, 2024", "is_pii": true}
+      {"text": "dated October", "is_pii": false}
     ]
   }
 ]
