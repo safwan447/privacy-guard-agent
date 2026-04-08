@@ -45,28 +45,26 @@ class PrivacyEnv:
     def step(self, action: PrivacyAction):
         """
         Processes the action and returns (obs, reward, done, info).
-        META RULE: Rewards must be STRICTLY between 0.0 and 1.0 (e.g., 0.1 or 0.9).
+        META RULE: Score must be STRICTLY between 0 and 1 (0.2 or 0.8).
         """
         segments = self.documents[self.doc_idx]["segments"]
         segment = segments[self.seg_idx]
         is_pii = segment["is_pii"]
         
-        # We use 0.9 for success and 0.1 for failure to stay within (0, 1) range
-        reward = 0.1
+        # Initialize with a safe 'failure' reward
+        reward = 0.2
         
         if is_pii and action.action == PrivacyActionType.REDACT:
-            reward = 0.9  # Correct Redaction
+            reward = 0.8  # Success
         elif not is_pii and action.action == PrivacyActionType.KEEP:
-            reward = 0.9  # Correct Keep
+            reward = 0.8  # Success
         elif is_pii and action.action == PrivacyActionType.KEEP:
-            reward = 0.1  # Leak
+            reward = 0.2  # Failure (PII Leak)
         elif not is_pii and action.action == PrivacyActionType.REDACT:
-            reward = 0.1  # Over-redaction
+            reward = 0.2  # Failure (Over-redaction)
         
-        # Progress the segment index
         self.seg_idx += 1
         done = self.seg_idx >= len(segments)
-        
-        # Return results
         obs = self._get_obs() if not done else None
+        
         return obs, float(reward), done, {}

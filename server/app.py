@@ -36,12 +36,14 @@ async def step(action: PrivacyAction):
 
 @app.get("/tasks")
 async def get_tasks():
-    # Mandatory: Returns the 3 tasks for the OpenEnv spec.
-    return [
-        {"id": "task_1_simple", "name": "Pattern Matching", "difficulty": "easy"},
-        {"id": "task_2_contextual", "name": "Entity Recognition", "difficulty": "medium"},
-        {"id": "task_3_legal", "name": "High-Stakes Anonymization", "difficulty": "hard"}
-    ]
+    """
+    FIX: Returns the full documents list from docs.json.
+    This ensures the 'grader' and 'id' fields are present for the validator.
+    """
+    try:
+        return env.documents
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/state")
 async def get_state():

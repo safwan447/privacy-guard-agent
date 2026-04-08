@@ -1,5 +1,6 @@
 [
   {
+    "id": "task_1_simple",
     "task_id": "task_1_simple",
     "name": "Pattern Matching",
     "difficulty": "easy",
@@ -12,6 +13,7 @@
     ]
   },
   {
+    "id": "task_2_contextual",
     "task_id": "task_2_contextual",
     "name": "Entity Recognition",
     "difficulty": "medium",
@@ -24,6 +26,7 @@
     ]
   },
   {
+    "id": "task_3_legal",
     "task_id": "task_3_legal",
     "name": "High-Stakes Anonymization",
     "difficulty": "hard",
