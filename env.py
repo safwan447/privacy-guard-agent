@@ -13,7 +13,6 @@ class PrivacyEnv:
         self.seg_idx = 0
 
     def state(self):
-        """Mandatory for OpenEnv Spec Compliance."""
         doc = self.documents[self.doc_idx]
         segments = doc.get("segments", [])
         return {
@@ -23,45 +22,37 @@ class PrivacyEnv:
         }
 
     def reset(self):
-        """Restarts the environment for a fresh evaluation."""
         self.seg_idx = 0
         return self._get_obs()
 
     def _get_obs(self):
-        """Constructs the observation for the agent."""
         doc = self.documents[self.doc_idx]
         segments = doc["segments"]
-        
         current_idx = min(self.seg_idx, len(segments) - 1)
         segment = segments[current_idx]
         
         return PrivacyObservation(
             text_segment=segment["text"],
-            context_before="No context available" if current_idx == 0 else segments[current_idx-1]["text"][:50],
-            context_after="No context available" if current_idx >= len(segments)-1 else segments[current_idx+1]["text"][:50],
+            context_before="No context" if current_idx == 0 else segments[current_idx-1]["text"][:50],
+            context_after="No context" if current_idx >= len(segments)-1 else segments[current_idx+1]["text"][:50],
             segment_id=current_idx
         )
 
     def step(self, action: PrivacyAction):
         """
-        Processes the action and returns (obs, reward, done, info).
-        META RULE: Score must be STRICTLY between 0 and 1 (0.2 or 0.8).
+        META RULE: Rewards MUST be strictly between 0 and 1.
+        Success: 0.85 | Failure: 0.15
         """
         segments = self.documents[self.doc_idx]["segments"]
         segment = segments[self.seg_idx]
         is_pii = segment["is_pii"]
         
-        # Initialize with a safe 'failure' reward
-        reward = 0.2
-        
-        if is_pii and action.action == PrivacyActionType.REDACT:
-            reward = 0.8  # Success
-        elif not is_pii and action.action == PrivacyActionType.KEEP:
-            reward = 0.8  # Success
-        elif is_pii and action.action == PrivacyActionType.KEEP:
-            reward = 0.2  # Failure (PII Leak)
-        elif not is_pii and action.action == PrivacyActionType.REDACT:
-            reward = 0.2  # Failure (Over-redaction)
+        # Determine reward strictly inside (0, 1)
+        if (is_pii and action.action == PrivacyActionType.REDACT) or \
+           (not is_pii and action.action == PrivacyActionType.KEEP):
+            reward = 0.85
+        else:
+            reward = 0.15
         
         self.seg_idx += 1
         done = self.seg_idx >= len(segments)
