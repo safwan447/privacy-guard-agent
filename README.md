@@ -1,57 +1,40 @@
----
-title: Privacy Guard Agent
-emoji: 🛡️
-colorFrom: blue
-colorTo: gray
-sdk: docker
-app_port: 8000
-pinned: false
----
+# 🛡️ Privacy Guard Agent (Meta OpenEnv Hackathon)
 
-# 🛡️ Privacy Guard Agent
-**An OpenEnv Reinforcement Learning Environment for PII Redaction**
 
-Developed for the **Meta OpenEnv Hackathon (April 2026)**. This repository contains a spec-compliant environment designed to evaluate agents on their ability to detect and redact Personally Identifiable Information (PII) from sensitive legal and medical documents.
+## 🌟 Motivation & Description
+The Privacy Guard Agent is a real-world simulation of an automated PII (Personally Identifiable Information) anonymization pipeline. As organizations increasingly use LLMs, the risk of leaking sensitive data like phone numbers and emails is a critical concern. This environment simulates a triage task where an agent must decide whether to redact or keep specific text segments to ensure data privacy before processing.
 
----
+## 🧠 Action & Observation Space
 
-## 🚀 Quick Start
-This environment is built to be **multi-mode**, supporting both local execution and containerized deployment.
+### Observation Space
+The agent receives a `PrivacyObservation` containing:
+* **text_segment:** The current string being evaluated.
+* **context_before:** A 30-character prefix for context.
+* **context_after:** A 30-character suffix for context.
+* **segment_id:** The index of the segment within the document.
 
-### 🔗 Live Deployment
-The environment is live and graded at:
-**[Hugging Face Space](https://huggingface.co/spaces/safwan447/privacy-guard-agent)**
+### Action Space
+The agent can perform one of two actions:
+* **REDACT:** Masks the segment as PII.
+* **KEEP:** Allows the segment to pass through as safe text.
 
-### 🛠️ Tech Stack
-* **Runtime:** Python 3.10+
-* **Framework:** FastAPI (Uvicorn)
-* **Deployment:** Docker (Hugging Face Spaces)
-* **Standard:** OpenEnv Multi-mode Spec
+## 📋 Task Descriptions
+| Task ID | Name | Difficulty | Description |
+| :--- | :--- | :--- | :--- |
+| `task_1_simple` | Pattern Matching | Easy | Identifying standard numeric patterns (phone numbers). |
+| `task_2_contextual` | Entity Recognition | Medium | Identifying names and entities that require sentence context. |
+| `task_3_legal` | High-Stakes Anonymization | Hard | Dealing with mixed legal jargon and alphanumeric IDs. |
 
----
+## 🚀 Setup & Usage
 
-## 📊 Environment Specification
-This environment implements the following mandatory endpoints for the OpenEnv leaderboard:
+### Local Development
+1. **Clone the repo:** `git clone <your-repo-link>`
+2. **Install dependencies:** `pip install -r requirements.txt`
+3. **Run the server:** `python server/app.py`
+4. **Run inference:** `python inference.py`
 
-* `GET /tasks`: Lists available redaction challenges.
-* `POST /reset`: Restarts the document stream for a specific task.
-* `POST /step`: Processes an agent's action (`KEEP` or `REDACT`) and returns rewards.
-* `GET /state`: Returns the current progress within a document.
-
-### 💰 Reward Structure
-To ensure safe data handling, the reward system is strictly calibrated:
-* **Correct Redaction:** `+1.0`
-* **Correct Keep:** `+1.0`
-* **Data Leak (PII Kept):** `0.0` (Critical Failure)
-* **Over-Redaction:** `0.0`
-
----
-
-## 📂 Project Structure
-```text
-├── server/             # FastAPI implementation
-├── env.py              # RL Environment logic & Reward system
-├── models.py           # Pydantic data models
-├── inference.py        # Baseline LLM inference script
-├── docs.json           # Encrypted/Mock PII dataset
-└── Dockerfile          # Container configuration
+### Docker Support
+The project is fully containerized. To build and run:
+```bash
+docker build -t privacy-agent .
+docker run -p 8000:8000 privacy-agent
