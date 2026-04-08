@@ -1,5 +1,3 @@
-# 🛡️ Privacy Guard Agent (Meta OpenEnv Hackathon)
-
 ---
 title: Privacy Guard Agent
 emoji: 🛡️
@@ -9,6 +7,9 @@ sdk: docker
 pinned: false
 app_port: 8000
 ---
+
+# 🛡️ Privacy Guard Agent (Meta OpenEnv Hackathon)
+
 
 ## Motivation & Description
 The Privacy Guard Agent is a real-world simulation of an automated PII (Personally Identifiable Information) anonymization pipeline. As organizations increasingly use LLMs, the risk of leaking sensitive data like phone numbers and emails is a critical concern. This environment simulates a triage task where an agent must decide whether to redact or keep specific text segments to ensure data privacy before processing.
