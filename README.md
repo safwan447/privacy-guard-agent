@@ -1,5 +1,17 @@
+---
+title: Privacy Guard Agent
+emoji: 🛡️
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+app_port: 8000
+---
+
 # 🛡️ Privacy Guard Agent (Meta OpenEnv Hackathon)
 
+**Solo Architect:** Mohammed Safwan  
+**Status:** Phase 2 Validated ✅
 
 ## 🌟 Motivation & Description
 The Privacy Guard Agent is a real-world simulation of an automated PII (Personally Identifiable Information) anonymization pipeline. As organizations increasingly use LLMs, the risk of leaking sensitive data like phone numbers and emails is a critical concern. This environment simulates a triage task where an agent must decide whether to redact or keep specific text segments to ensure data privacy before processing.
@@ -28,7 +40,7 @@ The agent can perform one of two actions:
 ## 🚀 Setup & Usage
 
 ### Local Development
-1. **Clone the repo:** `git clone <your-repo-link>`
+1. **Clone the repo:** `git clone https://github.com/safwan447/privacy-guard-agent`
 2. **Install dependencies:** `pip install -r requirements.txt`
 3. **Run the server:** `python server/app.py`
 4. **Run inference:** `python inference.py`
